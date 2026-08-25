@@ -250,3 +250,219 @@
     </script>
 </body>
 </html>
+        }
+
+        /* Godmother Container scaled to match portrait proportions */
+        #godmotherContainer {
+            position: absolute;
+            bottom: 0px;
+            left: -320px;
+            width: 300px;
+            height: 440px;
+            z-index: 5;
+            display: none;
+            transition: left 3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* Photographic Asset Layer pointing to your repository image */
+        #visual {
+            width: 100%;
+            height: 100%;
+            background-image: url('https://raw.githubusercontent.com/musicnow-international/NewGodmotherApp/main/grok_1787634242926.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center bottom;
+            transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.6s ease-out;
+        }
+
+        /* Cinematic Motion */
+        .gm-walking #visual {
+            animation: cinematicGlide 0.8s infinite alternate ease-in-out;
+        }
+
+        @keyframes cinematicGlide {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-5px); }
+        }
+
+        .gm-speaking #visual {
+            animation: etherealBreathe 2.5s infinite alternate ease-in-out;
+        }
+
+        @keyframes etherealBreathe {
+            0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 8px rgba(230, 197, 107, 0.15)); }
+            100% { transform: translateY(-3px) scale(1.01); filter: drop-shadow(0 0 20px rgba(230, 197, 107, 0.4)); }
+        }
+
+        .gm-active { display: block !important; }
+        .gm-moving { left: calc(50% - 150px) !important; }
+
+        .gm-vanish #visual {
+            opacity: 0;
+            transform: scale(2.5) rotate(5deg);
+            filter: brightness(10) contrast(2) drop-shadow(0 0 50px #ffffff) drop-shadow(0 0 100px #e6c56b);
+        }
+
+        /* Synchronized Caption Box */
+        #captionBox {
+            position: absolute;
+            bottom: 45px;
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            color: #f7eedc;
+            font-size: 1.2rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+            background: rgba(12, 10, 14, 0.85);
+            padding: 16px 28px;
+            border-radius: 8px;
+            border: 1px solid rgba(230, 197, 107, 0.2);
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            z-index: 8;
+        }
+
+        #captionBox.show-caption {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Particle Sparkles */
+        .sparkle {
+            position: absolute;
+            background: #f7eedc;
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 10px #fff, 0 0 20px #e6c56b;
+            animation: burstSparkle 0.9s forwards ease-out;
+        }
+
+        @keyframes burstSparkle {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="triggerBtn">▶ Play Sequence</button>
+
+    <div id="captionBox"></div>
+
+    <audio id="godmotherVoice" src="https://raw.githubusercontent.com/musicnow-international/NewGodmotherApp/main/ElevenLabs_2026-08-25T00_18_39_God-mother_eleven_multilingual_v2.mp3" preload="auto"></audio>
+
+    <div id="godmotherContainer">
+        <div id="visual"></div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('triggerBtn');
+        const container = document.getElementById('godmotherContainer');
+        const audio = document.getElementById('godmotherVoice');
+        const captionBox = document.getElementById('captionBox');
+
+        const scriptTimings = [
+            { time: 0.0, text: "Hello, my dear..." },
+            { time: 2.5, text: "I have been watching over you." },
+            { time: 5.0, text: "Remember that magic lives within your heart." },
+            { time: 8.0, text: "Go forth and shine!" }
+        ];
+
+        let captionInterval;
+
+        function updateCaptions(currentTime) {
+            let activeText = "";
+            for (let i = 0; i < scriptTimings.length; i++) {
+                if (currentTime >= scriptTimings[i].time) {
+                    activeText = scriptTimings[i].text;
+                }
+            }
+            if (activeText) {
+                captionBox.textContent = activeText;
+                captionBox.classList.add('show-caption');
+            }
+        }
+
+        function createSparkles() {
+            const rect = container.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for (let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                
+                const size = Math.random() * 6 + 3;
+                sparkle.style.width = `${size}px`;
+                sparkle.style.height = `${size}px`;
+                sparkle.style.left = `${centerX}px`;
+                sparkle.style.top = `${centerY}px`;
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 180 + 40;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                sparkle.style.setProperty('--tx', `${tx}px`);
+                sparkle.style.setProperty('--ty', `${ty}px`);
+
+                document.body.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 900);
+            }
+        }
+
+        btn.addEventListener('click', () => {
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }).catch(err => console.log("Audio unlock error:", err));
+
+            container.className = '';
+            captionBox.className = '';
+            captionBox.textContent = '';
+            clearInterval(captionInterval);
+
+            container.classList.add('gm-active', 'gm-walking');
+            void container.offsetWidth; 
+
+            container.classList.add('gm-moving');
+
+            setTimeout(() => {
+                container.classList.remove('gm-walking');
+                container.classList.add('gm-speaking');
+                
+                audio.play().catch(e => console.log("Playback error:", e));
+
+                captionInterval = setInterval(() => {
+                    updateCaptions(audio.currentTime);
+                }, 100);
+
+                audio.onended = () => {
+                    clearInterval(captionInterval);
+                    captionBox.classList.remove('show-caption');
+                    
+                    container.classList.remove('gm-speaking');
+                    container.classList.add('gm-vanish');
+                    
+                    createSparkles();
+
+                    setTimeout(() => {
+                        container.classList.remove('gm-active');
+                        container.className = ''; 
+                    }, 600);
+                };
+
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
